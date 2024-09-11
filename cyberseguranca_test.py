@@ -1,8 +1,9 @@
 import os
-import sys
+import ctypes, sys
 import time
 from collections import defaultdict
 from scapy.all import sniff, IP
+
 
 THRESHOLD = 40
 print(f"THRESHOLD: {THRESHOLD}")
@@ -24,11 +25,19 @@ def packet_callback(packet):
         packet_count.clear()
         start_time[0] = current_time
 
-if __name__ == "__main__":
-    if os.geteuid() != 0:
-        print("This script requires root privileges.")
-        sys.exit(1)
 
+
+def is_admin():
+    try:
+        return ctypes.windll.shell32.IsUserAnAdmin()
+    except:
+        return False
+
+if __name__ == "__main__":
+    if not is_admin():
+        print("This script requires administrator privileges.")
+        sys.exit(1)
+        
     packet_count = defaultdict(int)
     start_time = [time.time()]
     blocked_ips = set()
